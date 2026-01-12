@@ -8,6 +8,15 @@ public class PlayerState : MonoBehaviour
     {
         CurrentPlayerMovementState = newPlayerMovementState;
     }
+
+    public bool InGroundedState()
+    {
+        return CurrentPlayerMovementState == PlayerMovementState.Idling ||
+               CurrentPlayerMovementState == PlayerMovementState.Walking ||
+               CurrentPlayerMovementState == PlayerMovementState.Running ||
+               CurrentPlayerMovementState == PlayerMovementState.Sprinting ||
+               CurrentPlayerMovementState == PlayerMovementState.Strafing;
+    }
 }
 
 public enum PlayerMovementState

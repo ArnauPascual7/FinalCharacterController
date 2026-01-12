@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: ab54d1b34370dbe4d896efebb96535ef
+guid: cac33d8006a7589458d8362604c6c55b
 ModelImporter:
   serializedVersion: 19301
   internalIDToNameTable:
@@ -1116,10 +1116,3 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 219979
-  packageName: FREE Low Poly Human - RPG Character
-  packageVersion: 1.0
-  assetPath: Assets/Blink/Art/Animations/Animations_Starter_Pack/Movement/Jumps.fbx
-  uploadId: 494280
