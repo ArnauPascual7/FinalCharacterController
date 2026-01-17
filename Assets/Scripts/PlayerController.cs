@@ -8,15 +8,24 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private CharacterController _characterController;
     [SerializeField] private Camera _playerCamera;
 
+    public float RotationMismatch { get; private set; } = 0f;
+    public bool IsRotatingToTarget { get; private set; } = false;
+
     [Header("Movement Settings")]
-    public float runAcceleration = 35f;
-    public float runSpeed = 4f;
-    public float sprintAcceleration = 50f;
-    public float sprintSpeed = 7f;
-    public float drag = 20f;
+    public float walkAcceleration = 0.15f;
+    public float walkSpeed = 3f;
+    public float runAcceleration = 0.25f;
+    public float runSpeed = 6f;
+    public float sprintAcceleration = 0.5f;
+    public float sprintSpeed = 9f;
+    public float drag = 0.1f;
     public float gravity = 25f;
     public float jumpSpeed = 1f;
     public float movingThreshold = 0.01f;
+
+    [Header("Rotation Settings")]
+    public float playerModelRotationSpeed = 10f;
+    public float rotateToTargetTime = 0.67f;
 
     [Header("Camera Settings")]
     public float lookSenseH = 0.1f;
@@ -29,6 +38,8 @@ public class PlayerController : MonoBehaviour
     private Vector2 _cameraRotation = Vector2.zero;
     private Vector2 _playerTargetRotation = Vector2.zero;
 
+    private bool _isRotatingClockwise = false;
+    private float _rotatingToTargetTimer = 0f;
     private float _verticalVelocity = 0f;
     #endregion
 
@@ -50,12 +61,15 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateMovementState()
     {
+        bool canRun = CanRun();
         bool isMovementInput = _playerLocomotionInput.MovementInput != Vector2.zero;
         bool isMovingLaterally = IsMovingLaterally();
         bool isSprinting = _playerLocomotionInput.SprintToggledOn && isMovingLaterally;
+        bool isWalking = (isMovingLaterally && !canRun) || _playerLocomotionInput.WalkToggledOn;
         bool isGrounded = IsGrounded();
 
         PlayerMovementState lateralState = 
+            isWalking ? PlayerMovementState.Walking :
             isSprinting ? PlayerMovementState.Sprinting :
             isMovingLaterally || isMovementInput ? PlayerMovementState.Running : PlayerMovementState.Idling;
 
@@ -92,9 +106,12 @@ public class PlayerController : MonoBehaviour
     {
         bool isSprinting = _playerState.CurrentPlayerMovementState == PlayerMovementState.Sprinting;
         bool isGrounded = _playerState.InGroundedState();
+        bool isWalking = _playerState.CurrentPlayerMovementState == PlayerMovementState.Walking;
 
-        float lateralAcceleration = isSprinting ? sprintAcceleration : runAcceleration;
-        float clampLateralMagnitude = isSprinting ? sprintSpeed : runSpeed;
+        float lateralAcceleration = isWalking ? walkAcceleration :
+                                    isSprinting ? sprintAcceleration : runAcceleration;
+        float clampLateralMagnitude = isWalking ? walkSpeed :
+                                      isSprinting ? sprintSpeed : runSpeed;
 
         Vector3 cameraForwardXZ = new Vector3(_playerCamera.transform.forward.x, 0, _playerCamera.transform.forward.z).normalized;
         Vector3 cameraRightXZ = new Vector3(_playerCamera.transform.right.x, 0, _playerCamera.transform.right.z).normalized;
@@ -115,13 +132,62 @@ public class PlayerController : MonoBehaviour
     #region LateUpdate Logic
     private void LateUpdate()
     {
+        UpdateCameraRotation();
+    }
+
+    private void UpdateCameraRotation()
+    {
         _cameraRotation.x += lookSenseH * _playerLocomotionInput.LookInput.x;
         _cameraRotation.y = Mathf.Clamp(_cameraRotation.y - lookSenseV * _playerLocomotionInput.LookInput.y, -lookLimitV, lookLimitV);
 
         _playerTargetRotation.x += transform.eulerAngles.x + lookSenseH * _playerLocomotionInput.LookInput.x;
-        transform.rotation = Quaternion.Euler(0, _playerTargetRotation.x, 0);
 
+        float rotationTolerance = 90f;
+        bool isIdling = _playerState.CurrentPlayerMovementState == PlayerMovementState.Idling;
+        IsRotatingToTarget = _rotatingToTargetTimer > 0;
+
+        // ROTATE if we're not idling
+        if (!isIdling)
+        {
+            RotatePlayerToTarget();
+        }
+        // If rotation mismatch not within tolerance, or rotate to target is active, ROTATE
+        else if (Mathf.Abs(RotationMismatch) > rotationTolerance || IsRotatingToTarget)
+        {
+            UpdateIdleRotation(rotationTolerance);
+        }
+        
         _playerCamera.transform.rotation = Quaternion.Euler(_cameraRotation.y, _cameraRotation.x, 0);
+
+        // Get angle between camera and player
+        Vector3 camForwardProjectedXZ = new Vector3(_playerCamera.transform.forward.x, 0, _playerCamera.transform.forward.z).normalized;
+        Vector3 crossProduct = Vector3.Cross(transform.forward, camForwardProjectedXZ);
+        float sign = Mathf.Sign(Vector3.Dot(crossProduct, transform.up));
+        RotationMismatch = sign * Vector3.Angle(transform.forward, camForwardProjectedXZ);
+    }
+
+    private void UpdateIdleRotation(float rotationTolerance)
+    {
+        // Initiate new rotation direction
+        if (Mathf.Abs(RotationMismatch) > rotationTolerance)
+        {
+            _rotatingToTargetTimer = rotateToTargetTime;
+            _isRotatingClockwise = RotationMismatch > rotationTolerance;
+        }
+        _rotatingToTargetTimer -= Time.deltaTime;
+
+        // Rotate player
+        if (_isRotatingClockwise && RotationMismatch > 0f ||
+            !_isRotatingClockwise && RotationMismatch < 0f)
+        {
+            RotatePlayerToTarget();
+        }
+    }
+
+    private void RotatePlayerToTarget()
+    {
+        Quaternion targetRotationX = Quaternion.Euler(0f, _playerTargetRotation.x, 0f);
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotationX, playerModelRotationSpeed * Time.deltaTime);
     }
     #endregion
 
@@ -136,6 +202,11 @@ public class PlayerController : MonoBehaviour
     private bool IsGrounded()
     {
         return _characterController.isGrounded;
+    }
+
+    private bool CanRun()
+    {
+        return _playerLocomotionInput.MovementInput.y >= Mathf.Abs(_playerLocomotionInput.MovementInput.x);
     }
     #endregion
 }

@@ -12,6 +12,7 @@ public class PlayerLocomotionInput : MonoBehaviour, PlayerControls.IPlayerLocomo
     public Vector2 LookInput { get; private set; }
     public bool SprintToggledOn { get; private set; }
     public bool JumpPressed { get; private set; }
+    public bool WalkToggledOn { get; private set; }
     #endregion
 
     #region Startup
@@ -66,6 +67,13 @@ public class PlayerLocomotionInput : MonoBehaviour, PlayerControls.IPlayerLocomo
         if (!context.performed) return;
 
         JumpPressed = true;
+    }
+
+    public void OnToggleWalk(InputAction.CallbackContext context)
+    {
+        if (!context.performed) return;
+
+        WalkToggledOn = !WalkToggledOn;
     }
     #endregion
 }
