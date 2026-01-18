@@ -22,6 +22,10 @@ public class PlayerAnimation : MonoBehaviour
 
     private Vector3 _currentBlendInput = Vector3.zero;
 
+    private float _sprintMaxBlendValue = 1.5f;
+    private float _runMaxBlendValue = 1f;
+    private float _walkMaxBlendValue = 0.5f;
+
     private void Awake()
     {
         _playerLocomotionInput = GetComponent<PlayerLocomotionInput>();
@@ -43,9 +47,9 @@ public class PlayerAnimation : MonoBehaviour
         bool isFalling = _playerState.CurrentPlayerMovementState == PlayerMovementState.Falling;
         bool isGrounded = _playerState.InGroundedState();
 
-
-        Vector2 inputTarget = isSprinting ? _playerLocomotionInput.MovementInput * 1.5f : 
-                              isRunning ? _playerLocomotionInput.MovementInput * 1f : _playerLocomotionInput.MovementInput * 0.5f;
+        bool isRunBlendValue = isRunning || isJumping || isFalling;
+        Vector2 inputTarget = isSprinting ? _playerLocomotionInput.MovementInput * _sprintMaxBlendValue : 
+                              isRunBlendValue ? _playerLocomotionInput.MovementInput * _runMaxBlendValue : _playerLocomotionInput.MovementInput * _walkMaxBlendValue;
         _currentBlendInput = Vector3.Lerp(_currentBlendInput, inputTarget, locomotionBlendSpeed * Time.deltaTime);
 
         _animator.SetBool(isGroundedHash, isGrounded);

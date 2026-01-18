@@ -781,6 +781,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1205264539289685978, guid: b3ba7ad1c5eda9743978900ca8433d47, type: 3}
+      propertyPath: m_SkinWidth
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 4298874245929960779, guid: b3ba7ad1c5eda9743978900ca8433d47, type: 3}
+      propertyPath: IgnoreTag
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4298874245929960779, guid: b3ba7ad1c5eda9743978900ca8433d47, type: 3}
+      propertyPath: AimCollisionFilter.m_Bits
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6516928754595273202, guid: b3ba7ad1c5eda9743978900ca8433d47, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.31069
@@ -820,6 +832,22 @@ PrefabInstance:
     - target: {fileID: 6516928754595273202, guid: b3ba7ad1c5eda9743978900ca8433d47, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6683551716327074242, guid: b3ba7ad1c5eda9743978900ca8433d47, type: 3}
+      propertyPath: AvoidObstacles.Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6934220823447051523, guid: b3ba7ad1c5eda9743978900ca8433d47, type: 3}
+      propertyPath: lookLimitV
+      value: 89
+      objectReference: {fileID: 0}
+    - target: {fileID: 6934220823447051523, guid: b3ba7ad1c5eda9743978900ca8433d47, type: 3}
+      propertyPath: inAirAcceleration
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 6934220823447051523, guid: b3ba7ad1c5eda9743978900ca8433d47, type: 3}
+      propertyPath: _groundLayers.m_Bits
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8760690044082717874, guid: b3ba7ad1c5eda9743978900ca8433d47, type: 3}
       propertyPath: m_Name
